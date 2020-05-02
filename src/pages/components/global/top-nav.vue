@@ -1,7 +1,7 @@
 <template>
     <div id="top">
         闲言个人博客
-        <div class="login-box">欢迎：流浪小黄人</div>
+        <div class="login-box">欢迎{{username}}</div>
     </div>
 </template>
 <script>
@@ -9,8 +9,17 @@ export default {
     name: "top-nav",
     data() {
         return {
-            
+            username: ""
         }
+    },
+    mounted() {
+       if(this.$store.state.username) {
+           this.username = this.$store.state.username;
+       } else if(this.$cookies.get("token")) {
+           this.username = this.$cookies.get("username");
+       } else {
+           this.$router.push({path: "/login"})
+       }
     }
 }
 </script>
