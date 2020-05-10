@@ -1,32 +1,32 @@
 <template>
-    <div id="content">
-        <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+    <div id="artical-content">
+        <el-form :label-position="labelPosition" label-width="80px" :model="artical">
             <el-form-item label="标题">
-                <el-input v-model="formLabelAlign.title"></el-input>
+                <el-input v-model="artical.title"></el-input>
             </el-form-item>
              <el-form-item label="类型">
-                <el-select v-model="formLabelAlign.type" placeholder="请选类型">
+                <el-select v-model="artical.type" placeholder="请选类型">
                 <el-option label="javascript" value="javascript"></el-option>
                 <el-option label="vue" value="vue"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="内容">
                     <mavon-editor 
-                        v-model="content" 
                         ref="md" 
-                        @change="change" 
+                        v-model="artical.content"
                         style="min-height: 600px"
                     />
             </el-form-item>
              <el-form-item size="large" class="operator-box">
-                <el-button type="primary" @click="onSubmit">发布</el-button>
-                <el-button>取消</el-button>
+                <el-button type="primary" @click="publish">发布</el-button>
+                <el-button @click="cancel">取消</el-button>
             </el-form-item>
         </el-form>
     </div>
 </template>
 
 <script>
+    import artical from "@api/artical"
     import { mavonEditor } from 'mavon-editor'
     import 'mavon-editor/dist/css/index.css'
     export default {
@@ -34,21 +34,41 @@
         data() {
             return {
                 labelPosition: 'right',
-                formLabelAlign: {
+                artical: {
                     title: '',
-                    type: ''
-                },
-                content: ""
+                    type: '',
+                    content: "",
+                    articalId: ""
+                }
+            }
+        },
+        mounted() {
+            let articalId = this.$route.query.articalId;
+            if(articalId) {
+                artical.getArticalDetail({articalId: articalId}).then((res)=> {
+                    if(res && res.data.length > 0) {
+                        this.artical.title = res.data[0].title;
+                        this.artical.type = res.data[0].type;
+                        this.artical.content = res.data[0].content;
+                        this.artical.articalId = res.data[0].articalId;
+                    }
+                });
             }
         },
         methods: {
-            change(value, html) {
-                console.log(html);
-                console.log("==========");
-                console.log(this.content);
+            publish() {
+                if(!this.artical.title || !this.artical.type || !this.artical.content) {
+                    alert("数据均为必填项，请填写完整后提交!");
+                    return;
+                }
+                artical.publish(this.artical).then((res)=> {
+                    if(res.message == "success") {
+                        this.$router.push({path: '/list'});
+                    }
+                 });
             },
-            onSubmit() {
-
+            cancel() {
+                 this.$router.push({path: '/list'});
             }
         },
         components: {
@@ -57,34 +77,37 @@
     }
 </script>
 <style>
-    #content .el-input__inner {
+    #artical-content .el-input__inner {
         height: 60px;   
         width: 500px;
     }
-    #content .el-form-item__label {
+    #artical-content .el-form-item__label {
         width: 120px!important;
     }
-    #content .el-input {
+    #artical-content .el-input {
         width: 50%;
     }
-    #content .el-input__suffix {
+    #artical-content .el-input__suffix {
         right: -240px;
     }
-    #content .el-form-item {
+    #artical-content .el-form-item {
         margin-bottom: 42px;
     }
-    #content .el-form-item__label {
+    #artical-content .el-form-item__label {
         margin-right: 40px;
         margin-top: 8px;
     }
-    #content .operator-box {
+    #artical-content .operator-box {
         text-align: center;
     }
-    #content .el-button--primary {
+    #artical-content .el-button--primary {
         margin-right: 20px;
     }
-    #content .el-button--primary, #content .el-button+.el-button {
+    #artical-content .el-button--primary, #artical-content .el-button+.el-button {
         width: 200px;
         height: 70px;
+    }
+    #artical-content {
+        padding-bottom: 50px;
     }
 </style>

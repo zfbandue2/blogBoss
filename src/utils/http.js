@@ -11,7 +11,6 @@ export default {
     setInterceptor() {
         $http.interceptors.request.use(
         config => {
-            console.log(config);
             return config
         },
         err => {
@@ -19,8 +18,8 @@ export default {
         });
         $http.interceptors.response.use(
         response => {
-            if (response.data.code) {
-                
+            if (response.data.data.code == 401) {
+                location.href = "/#/login";
             }
             return response
         },
